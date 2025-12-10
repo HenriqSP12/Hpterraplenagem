@@ -30,12 +30,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Controle de Máquinas</title>
+    <title>Login - HP Terraplenagem</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
+        <img src="media/logo.png" alt="HP Terraplenagem" class="logo-login">
         <h2>Acesso do Operador</h2>
         
         <?php if(!empty($erro)): ?>
@@ -51,7 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
             <button type="submit" class="btn-login">Entrar no Sistema</button>
         </form>
-    </div>
+        
+        </div>
 
 </body>
 </html>
