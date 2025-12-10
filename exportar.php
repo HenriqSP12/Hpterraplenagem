@@ -2,47 +2,52 @@
 session_start();
 require 'db.php';
 
-if (!isset($_SESSION['id_usuario'])) {
+if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] != 'admin') {
     header("Location: index.php");
     exit;
 }
 
 header('Content-Type: text/csv; charset=utf-8');
-header('Content-Disposition: attachment; filename=relatorio_mensal.csv');
+header('Content-Disposition: attachment; filename=relatorio_hp.csv');
 
 $arquivo = fopen('php://output', 'w');
-
 fprintf($arquivo, chr(0xEF).chr(0xBB).chr(0xBF));
 
-fputcsv($arquivo, array('Operador', 'Máquina', 'Serviço', 'H. Inicial', 'H. Final', 'Total Horas', 'Data'), ';');
 
-$mes_atual = date('m');
-$ano_atual = date('Y');
+fputcsv($arquivo, array('Data', 'Operador', 'Máquina', 'Serviço', 'H. Inicial', 'H. Final', 'Total'), ';');
 
 
-$sql = "SELECT u.nome as nome_operador, r.nome_maquina, r.nome_servico, r.h_inicial, r.h_final, r.total_horas, r.data_registro 
-        FROM registros r
-        JOIN usuarios u ON r.operador_id = u.id
-        WHERE MONTH(r.data_registro) = '$mes_atual' 
-        AND YEAR(r.data_registro) = '$ano_atual'
-        ORDER BY r.nome_maquina ASC, r.data_registro ASC";
+if (isset($_GET['inicio']) && isset($_GET['fim'])) {
+    $inicio = $_GET['inicio'];
+    $fim    = $_GET['fim'];
+    
+    $sql = "SELECT u.nome as nome_operador, r.* FROM registros r
+            JOIN usuarios u ON r.operador_id = u.id
+            WHERE r.data_registro >= '$inicio 00:00:00' 
+            AND r.data_registro <= '$fim 23:59:59'
+            ORDER BY r.data_registro ASC";
+} else {
+
+    $mes = date('m');
+    $ano = date('Y');
+    $sql = "SELECT u.nome as nome_operador, r.* FROM registros r
+            JOIN usuarios u ON r.operador_id = u.id
+            WHERE MONTH(r.data_registro) = '$mes' AND YEAR(r.data_registro) = '$ano'";
+}
 
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $data_formatada = date('d/m/Y H:i', strtotime($row['data_registro']));
-        
         $linha = array(
+            date('d/m/Y', strtotime($row['data_registro'])),
             $row['nome_operador'],
             $row['nome_maquina'],
             $row['nome_servico'],
             str_replace('.', ',', $row['h_inicial']), 
             str_replace('.', ',', $row['h_final']),
-            str_replace('.', ',', $row['total_horas']),
-            $data_formatada
+            str_replace('.', ',', $row['total_horas'])
         );
-
         fputcsv($arquivo, $linha, ';');
     }
 }
