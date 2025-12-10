@@ -2,7 +2,7 @@
 session_start();
 require 'db.php';
 
-// Verifica se está logado
+
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: index.php");
     exit;
@@ -10,7 +10,7 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $mensagem = "";
 
-// LÓGICA DE ENVIO DO FORMULÁRIO (Só processa se for enviado via POST)
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $maquina = $_POST['maquina'];
     $servico = $_POST['servico']; 
